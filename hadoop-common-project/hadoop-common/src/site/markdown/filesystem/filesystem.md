@@ -12,7 +12,6 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-
 <!--  ============================================================= -->
 <!--  CLASS: FileSystem -->
 <!--  ============================================================= -->
@@ -33,10 +32,10 @@ this represents the present working directory of the client. Changes to this
 state are not reflected in the filesystem itself: they are unique to the instance
 of the client.
 
-**Implementation Note**: the static `FileSystem get(URI uri, Configuration conf) ` method MAY return
+**Implementation Note**: the static `FileSystem get(URI uri, Configuration conf)` method MAY return
 a pre-existing instance of a filesystem client class&mdash;a class that may also be in use in other threads.
 The implementations of `FileSystem` shipped with Apache Hadoop
-*do not make any attempt to synchronize access to the working directory field*.
+_do not make any attempt to synchronize access to the working directory field_.
 
 ## Invariants
 
@@ -47,7 +46,7 @@ all operations on a valid FileSystem MUST result in a new FileSystem that is als
 
 ### <a name="ProtectedDirectories"></a>Protected directories
 
-HDFS has the notion of *Protected Directories*, which are declared in
+HDFS has the notion of _Protected Directories_, which are declared in
 the option `fs.protected.directories`. Any attempt to delete or rename
 such a directory or a parent thereof raises an `AccessControlException`.
 Accordingly, any attempt to delete the root directory SHALL, if there is
@@ -55,23 +54,17 @@ a protected directory, result in such an exception being raised.
 
 ## Predicates and other state access operations
 
-
 ### `boolean exists(Path p)`
 
-
     def exists(FS, p) = p in paths(FS)
-
 
 ### `boolean isDirectory(Path p)`
 
     def isDirectory(FS, p)= p in directories(FS)
 
-
 ### `boolean isFile(Path p)`
 
-
     def isFile(FS, p) = p in files(FS)
-
 
 ### `FileStatus getFileStatus(Path p)`
 
@@ -129,9 +122,7 @@ may differ from the local user account name.
 **It is the responsibility of the FileSystem to determine the actual home directory
 of the caller.**
 
-
 #### Preconditions
-
 
 #### Postconditions
 
@@ -144,9 +135,9 @@ code may fail.
 
 #### Implementation Notes
 
-* The `FTPFileSystem` queries this value from the remote filesystem and may
-fail with a `RuntimeException` or subclass thereof if there is a connectivity
-problem. The time to execute the operation is not bounded.
+- The `FTPFileSystem` queries this value from the remote filesystem and may
+  fail with a `RuntimeException` or subclass thereof if there is a connectivity
+  problem. The time to execute the operation is not bounded.
 
 ### `FileStatus[] listStatus(Path path, PathFilter filter)`
 
@@ -170,7 +161,6 @@ Path `path` must exist:
 
 #### Postconditions
 
-
     if isFile(FS, path) and filter.accept(path) :
       result = [ getFileStatus(path) ]
 
@@ -181,7 +171,6 @@ Path `path` must exist:
       result = [
         getFileStatus(c) for c in children(FS, path) if filter.accepts(c)
       ]
-
 
 **Implicit invariant**: the contents of a `FileStatus` of a child retrieved
 via `listStatus()` are equal to those from a call of `getFileStatus()`
@@ -208,21 +197,21 @@ attributes of any files, and the existence of the path supplied.
 The state of a directory MAY change during the evaluation
 process.
 
-* After an entry at path `P` is created, and before any other
- changes are made to the filesystem, `listStatus(P)` MUST
- find the file and return its status.
+- After an entry at path `P` is created, and before any other
+  changes are made to the filesystem, `listStatus(P)` MUST
+  find the file and return its status.
 
-* After an entry at path `P` is deleted, and before any other
- changes are made to the filesystem, `listStatus(P)` MUST
- raise a `FileNotFoundException`.
+- After an entry at path `P` is deleted, and before any other
+  changes are made to the filesystem, `listStatus(P)` MUST
+  raise a `FileNotFoundException`.
 
-* After an entry at path `P` is created, and before any other
- changes are made to the filesystem, the result of `listStatus(parent(P))` SHOULD
- include the value of `getFileStatus(P)`.
+- After an entry at path `P` is created, and before any other
+  changes are made to the filesystem, the result of `listStatus(parent(P))` SHOULD
+  include the value of `getFileStatus(P)`.
 
-* After an entry at path `P` is created, and before any other
- changes are made to the filesystem, the result of `listStatus(parent(P))` SHOULD
- NOT include the value of `getFileStatus(P)`.
+- After an entry at path `P` is created, and before any other
+  changes are made to the filesystem, the result of `listStatus(parent(P))` SHOULD
+  NOT include the value of `getFileStatus(P)`.
 
 This is not a theoretical possibility, it is observable in HDFS when a
 directory contains many thousands of files.
@@ -234,7 +223,6 @@ Consider a directory `"/d"` with the contents:
     part-0000002
     ...
     part-9999999
-
 
 If the number of files is such that HDFS returns a partial listing in each
 response, then, if a listing `listStatus("/d")` takes place concurrently with the operation
@@ -293,7 +281,6 @@ any optimizations.
 
 The atomicity and consistency constraints are as for
 `listStatus(Path, PathFilter)`.
-
 
 ### `FileStatus[] listStatus(Path[] paths)`
 
@@ -411,14 +398,13 @@ The atomicity and consistency constraints are as for
 
     if s < 0 or l < 0 : raise {HadoopIllegalArgumentException, InvalidArgumentException}
 
-* HDFS throws `HadoopIllegalArgumentException` for an invalid offset
-or length; this extends `IllegalArgumentException`.
+- HDFS throws `HadoopIllegalArgumentException` for an invalid offset
+  or length; this extends `IllegalArgumentException`.
 
 #### Postconditions
 
 If the filesystem is location aware, it must return the list
 of block locations where the data in the range `[s:s+l]` can be found.
-
 
     if f == null :
         result = null
@@ -432,10 +418,8 @@ Where
 
       def blocks(FS, p, s, s +  l)  = a list of the blocks containing data(FS, path)[s:s+l]
 
-
-Note that that as `length(FS, f) ` is defined as `0` if `isDir(FS, f)`, the result
+Note that that as `length(FS, f)` is defined as `0` if `isDir(FS, f)`, the result
 of `getFileBlockLocations()` on a directory is `[]`
-
 
 If the filesystem is not location aware, it SHOULD return
 
@@ -446,28 +430,23 @@ If the filesystem is not location aware, it SHOULD return
                    0, f.getLen())
        ] ;
 
-
-*A bug in Hadoop 1.0.3 means that a topology path of the same number
+\*A bug in Hadoop 1.0.3 means that a topology path of the same number
 of elements as the cluster topology MUST be provided, hence Filesystems SHOULD
 return that `"/default/localhost"` path. While this is no longer an issue,
 the convention is generally retained.
 
-
-###  `BlockLocation[] getFileBlockLocations(Path P, int S, int L)`
+### `BlockLocation[] getFileBlockLocations(Path P, int S, int L)`
 
 #### Preconditions
 
-
     if p == null : raise NullPointerException
     if not exists(FS, p) : raise FileNotFoundException
-
 
 #### Postconditions
 
     result = getFileBlockLocations(getFileStatus(FS, P), S, L)
 
-
-###  `long getDefaultBlockSize()`
+### `long getDefaultBlockSize()`
 
 Get the "default" block size for a filesystem. This is often used during
 split calculations to divide work optimally across a set of worker processes.
@@ -488,16 +467,14 @@ Any FileSystem that does not actually break files into blocks SHOULD
 return a number for this that results in efficient processing.
 A FileSystem MAY make this user-configurable (the object store connectors usually do this).
 
-###  `long getDefaultBlockSize(Path p)`
+### `long getDefaultBlockSize(Path p)`
 
 Get the "default" block size for a path --that is, the block size to be used
 when writing objects to a path in the filesystem.
 
 #### Preconditions
 
-
 #### Postconditions
-
 
     result = integer  >= 0
 
@@ -511,7 +488,7 @@ SHOULD be returned.
 It is not an error if the path does not exist: the default/recommended value
 for that part of the filesystem MUST be returned.
 
-###  `long getBlockSize(Path p)`
+### `long getBlockSize(Path p)`
 
 This method is exactly equivalent to querying the block size
 of the `FileStatus` structure returned in `getFileStatus(p)`.
@@ -524,7 +501,6 @@ on the filesystem.
 #### Preconditions
 
     if not exists(FS, p) :  raise FileNotFoundException
-
 
 #### Postconditions
 
@@ -543,24 +519,21 @@ Create a directory and all its parents.
 
 #### Preconditions
 
-
 The path must either be a directory or not exist
- 
+
      if exists(FS, p) and not isDir(FS, p) :
          raise [ParentNotDirectoryException, FileAlreadyExistsException, IOException]
 
 No ancestor may be a file
 
-    forall d = ancestors(FS, p) : 
+    forall d = ancestors(FS, p) :
         if exists(FS, d) and not isDir(FS, d) :
             raise [ParentNotDirectoryException, FileAlreadyExistsException, IOException]
 
 #### Postconditions
 
-
     FS' where FS'.Directories' = FS.Directories + [p] + ancestors(FS, p)
     result = True
-
 
 The condition exclusivity requirement of a FileSystem's directories,
 files and symbolic links must hold.
@@ -569,10 +542,9 @@ The probe for the existence and type of a path and directory creation MUST be
 atomic. The combined operation, including `mkdirs(parent(F))` MAY be atomic.
 
 The return value is always true&mdash;even if a new directory is not created
- (this is defined in HDFS).
+(this is defined in HDFS).
 
 ### <a name='FileSystem.create'></a> `FSDataOutputStream create(Path, ...)`
-
 
     FSDataOutputStream create(Path p,
           FsPermission permission,
@@ -581,7 +553,6 @@ The return value is always true&mdash;even if a new directory is not created
           short replication,
           long blockSize,
           Progressable progress) throws IOException;
-
 
 #### Preconditions
 
@@ -595,12 +566,12 @@ Writing to or overwriting a directory must fail.
 
 No ancestor may be a file
 
-    forall d = ancestors(FS, p) : 
+    forall d = ancestors(FS, p) :
         if exists(FS, d) and not isDir(FS, d) :
             raise [ParentNotDirectoryException, FileAlreadyExistsException, IOException]
 
 FileSystems may reject the request for other
-reasons, such as the FS being read-only  (HDFS),
+reasons, such as the FS being read-only (HDFS),
 the block size being below the minimum permitted (HDFS),
 the replication count being out of range (HDFS),
 quotas on namespace or filesystem being exceeded, reserved
@@ -623,22 +594,22 @@ The result is `FSDataOutputStream`, which through its operations may generate ne
 
 #### Implementation Notes
 
-* Some implementations split the create into a check for the file existing
- from the
- actual creation. This means the operation is NOT atomic: it is possible for
- clients creating files with `overwrite==true` to fail if the file is created
- by another client between the two tests.
+- Some implementations split the create into a check for the file existing
+  from the
+  actual creation. This means the operation is NOT atomic: it is possible for
+  clients creating files with `overwrite==true` to fail if the file is created
+  by another client between the two tests.
 
-* S3A, Swift and potentially other Object Stores do not currently change the FS state
-until the output stream `close()` operation is completed.
-This MAY be a bug, as it allows >1 client to create a file with `overwrite==false`,
- and potentially confuse file/directory logic
+- S3A, Swift and potentially other Object Stores do not currently change the FS state
+  until the output stream `close()` operation is completed.
+  This MAY be a bug, as it allows >1 client to create a file with `overwrite==false`,
+  and potentially confuse file/directory logic
 
-* The Local FileSystem raises a `FileNotFoundException` when trying to create a file over
-a directory, hence it is listed as an exception that MAY be raised when
-this precondition fails.
+- The Local FileSystem raises a `FileNotFoundException` when trying to create a file over
+  a directory, hence it is listed as an exception that MAY be raised when
+  this precondition fails.
 
-* Not covered: symlinks. The resolved path of the symlink is used as the final path argument to the `create()` operation
+- Not covered: symlinks. The resolved path of the symlink is used as the final path argument to the `create()` operation
 
 ### `FSDataOutputStreamBuilder createFile(Path p)`
 
@@ -652,10 +623,10 @@ the builder parameters are verified and [`create(Path p)`](#FileSystem.create)
 is invoked on the underlying filesystem. `build()` has the same preconditions
 and postconditions as [`create(Path p)`](#FileSystem.create).
 
-* Similar to [`create(Path p)`](#FileSystem.create), files are overwritten
-by default, unless specify `builder.overwrite(false)`.
-* Unlike [`create(Path p)`](#FileSystem.create), missing parent directories are
-not created by default, unless specify `builder.recursive()`.
+- Similar to [`create(Path p)`](#FileSystem.create), files are overwritten
+  by default, unless specify `builder.overwrite(false)`.
+- Unlike [`create(Path p)`](#FileSystem.create), missing parent directories are
+  not created by default, unless specify `builder.recursive()`.
 
 ### <a name='FileSystem.append'></a> `FSDataOutputStream append(Path p, int bufferSize, Progressable progress)`
 
@@ -716,15 +687,13 @@ an implementation detail.
 
 The result MUST be the same for local and remote callers of the operation.
 
-
 #### HDFS implementation notes
 
 1. HDFS MAY throw `UnresolvedPathException` when attempting to traverse
-symbolic links
+   symbolic links
 
 1. HDFS throws `IOException("Cannot open filename " + src)` if the path
-exists in the metadata, but no copies of any its blocks can be located;
--`FileNotFoundException` would seem more accurate and useful.
+   exists in the metadata, but no copies of any its blocks can be located; -`FileNotFoundException` would seem more accurate and useful.
 
 ### `FSDataInputStreamBuilder openFile(Path path)`
 
@@ -746,7 +715,7 @@ Thus the chain `openFile(path).build().get()` has the same preconditions
 and postconditions as `open(Path p, int bufferSize)`
 
 However, there is one difference which implementations are free to
-take advantage of: 
+take advantage of:
 
 The returned stream MAY implement a lazy open where file non-existence or
 access permission failures may not surface until the first `read()` of the
@@ -787,7 +756,7 @@ opt to require one or more mandatory options to be set.
 The returned stream may perform "lazy" evaluation of file access. This is
 relevant for object stores where the probes for existence are expensive, and,
 even with an asynchronous open, may be considered needless.
- 
+
 ### `FSDataInputStreamBuilder openFile(PathHandle)`
 
 Creates a `FSDataInputStreamBuilder` to build an operation to open a file.
@@ -847,10 +816,10 @@ An implementation MUST throw `UnsupportedOperationException` if it cannot
 support the semantics specified by the caller. The default set of options
 are as follows.
 
-|            | Unmoved  | Moved     |
-|-----------:|:--------:|:---------:|
-| Unchanged  | EXACT    | CONTENT   |
-| Changed    | PATH     | REFERENCE |
+|           | Unmoved |   Moved   |
+| --------: | :-----: | :-------: |
+| Unchanged |  EXACT  |  CONTENT  |
+|   Changed |  PATH   | REFERENCE |
 
 Changes to ownership, extended attributes, and other metadata are not
 required to match the `PathHandle`. Implementations can extend the set of
@@ -947,7 +916,7 @@ completed successfully then there is nothing at the end of the path.
 That is: the outcome is desired. The return flag simply tells the caller
 whether or not any change was made to the state of the filesystem.
 
-*Note*: many uses of this method surround it with checks for the return value being
+_Note_: many uses of this method surround it with checks for the return value being
 false, raising exception if so. For example
 
 ```java
@@ -968,7 +937,6 @@ A directory with children and `recursive == False` cannot be deleted
 
 #### Postconditions
 
-
 ##### Nonexistent path
 
 If the file does not exist the filesystem state does not change
@@ -979,16 +947,13 @@ If the file does not exist the filesystem state does not change
 
 The result SHOULD be `False`, indicating that no file was deleted.
 
-
 ##### Simple File
-
 
 A path referring to a file is removed, return value: `True`
 
     if isFile(FS, p) :
         FS' = (FS.Directories, FS.Files - [p], FS.Symlinks)
         result = True
-
 
 ##### Empty root directory, `recursive == False`
 
@@ -1004,8 +969,7 @@ There is no consistent return code from an attempt to delete the root directory.
 Implementations SHOULD return true; this avoids code which checks for a false
 return value from overreacting.
 
-*Object Stores*: see [Object Stores: root directory deletion](#object-stores-rm-root).
-
+_Object Stores_: see [Object Stores: root directory deletion](#object-stores-rm-root).
 
 ##### Empty (non-root) directory `recursive == False`
 
@@ -1016,29 +980,28 @@ return true.
         FS' = (FS.Directories - [p], FS.Files, FS.Symlinks)
         result = True
 
-
 ##### Recursive delete of non-empty root directory
 
 Deleting a root path with children and `recursive==True`
 can generally have three outcomes:
 
-1. The POSIX model assumes that if the user has
-the correct permissions to delete everything,
-they are free to do so (resulting in an empty filesystem).
+1.  The POSIX model assumes that if the user has
+    the correct permissions to delete everything,
+    they are free to do so (resulting in an empty filesystem).
 
-        if isDir(FS, p) and isRoot(p) and recursive :
-            FS' = ({["/"]}, {}, {}, {})
-            result = True
+            if isDir(FS, p) and isRoot(p) and recursive :
+                FS' = ({["/"]}, {}, {}, {})
+                result = True
 
-1. HDFS never permits the deletion of the root of a filesystem; the
-filesystem must be taken offline and reformatted if an empty
-filesystem is desired.
+1.  HDFS never permits the deletion of the root of a filesystem; the
+    filesystem must be taken offline and reformatted if an empty
+    filesystem is desired.
 
-        if isDir(FS, p) and isRoot(p) and recursive :
-            FS' = FS
-            result = False
+            if isDir(FS, p) and isRoot(p) and recursive :
+                FS' = FS
+                result = False
 
-1. Object Stores: see [Object Stores: root directory deletion](#object-stores-rm-root).
+1.  Object Stores: see [Object Stores: root directory deletion](#object-stores-rm-root).
 
 This specification does not recommend any specific action. Do note, however,
 that the POSIX model assumes that there is a permissions model such that normal
@@ -1048,7 +1011,6 @@ which only system administrators should be able to perform.
 Any filesystem client which interacts with a remote filesystem which lacks
 such a security model, MAY reject calls to `delete("/", true)` on the basis
 that it makes it too easy to lose data.
-
 
 ### <a name="object-stores-rm-root"></a> Object Stores: root directory deletion
 
@@ -1082,19 +1044,19 @@ removes the path and all descendants
 
 #### Atomicity
 
-* Deleting a file MUST be an atomic action.
+- Deleting a file MUST be an atomic action.
 
-* Deleting an empty directory MUST be an atomic action.
+- Deleting an empty directory MUST be an atomic action.
 
-* A recursive delete of a directory tree MUST be atomic.
+- A recursive delete of a directory tree MUST be atomic.
 
 #### Implementation Notes
 
-* Object Stores and other non-traditional filesystems onto which a directory
- tree is emulated, tend to implement `delete()` as recursive listing and
-entry-by-entry delete operation.
-This can break the expectations of client applications for O(1) atomic directory
-deletion, preventing the stores' use as drop-in replacements for HDFS.
+- Object Stores and other non-traditional filesystems onto which a directory
+  tree is emulated, tend to implement `delete()` as recursive listing and
+  entry-by-entry delete operation.
+  This can break the expectations of client applications for O(1) atomic directory
+  deletion, preventing the stores' use as drop-in replacements for HDFS.
 
 ### `boolean rename(Path src, Path d)`
 
@@ -1121,7 +1083,6 @@ Source `src` must exist:
 
     exists(FS, src) else raise FileNotFoundException
 
-
 `dest` cannot be a descendant of `src`:
 
     if isDescendant(FS, src, dest) : raise IOException
@@ -1142,20 +1103,17 @@ There must not be an existing file at the end of the destination path:
 
     if isFile(FS, dest) : raise FileAlreadyExistsException, IOException
 
-
 #### Postconditions
-
 
 ##### Renaming a directory onto itself
 
 Renaming a directory onto itself is no-op; return value is not specified.
 
-In POSIX the result is `False`;  in HDFS the result is `True`.
+In POSIX the result is `False`; in HDFS the result is `True`.
 
     if isDir(FS, src) and src == dest :
         FS' = FS
         result = (undefined)
-
 
 ##### Renaming a file to self
 
@@ -1165,11 +1123,10 @@ Renaming a file to itself is a no-op; the result is `True`.
          FS' = FS
          result = True
 
-
 ##### Renaming a file onto a nonexistent path
 
 Renaming a file where the destination is a directory moves the file as a child
- of the destination directory, retaining the filename element of the source path.
+of the destination directory, retaining the filename element of the source path.
 
     if isFile(FS, src) and src != dest:
         FS' where:
@@ -1177,8 +1134,6 @@ Renaming a file where the destination is a directory moves the file as a child
             and exists(FS', dest)
             and data(FS', dest) == data (FS, dest)
         result = True
-
-
 
 ##### Renaming a directory onto a directory
 
@@ -1204,31 +1159,31 @@ If `src` is a directory then all its children will then exist under `dest`, whil
 
 There is no consistent behavior here.
 
-*HDFS*
+_HDFS_
 
 The outcome is no change to FileSystem state, with a return value of false.
 
     FS' = FS; result = False
 
-*Local Filesystem*
+_Local Filesystem_
 
 The outcome is as a normal rename, with the additional (implicit) feature
 that the parent directories of the destination also exist.
 
     exists(FS', parent(dest))
 
-*Other Filesystems (including Swift) *
+_Other Filesystems (including Swift) _
 
 Other filesystems strictly reject the operation, raising a `FileNotFoundException`
 
 ##### Concurrency requirements
 
-* The core operation of `rename()`&mdash;moving one entry in the filesystem to
-another&mdash;MUST be atomic. Some applications rely on this as a way to coordinate access to data.
+- The core operation of `rename()`&mdash;moving one entry in the filesystem to
+  another&mdash;MUST be atomic. Some applications rely on this as a way to coordinate access to data.
 
-* Some FileSystem implementations perform checks on the destination
-FileSystem before and after the rename. One example of this is `ChecksumFileSystem`, which
-provides checksummed access to local data. The entire sequence MAY NOT be atomic.
+- Some FileSystem implementations perform checks on the destination
+  FileSystem before and after the rename. One example of this is `ChecksumFileSystem`, which
+  provides checksummed access to local data. The entire sequence MAY NOT be atomic.
 
 ##### Implementation Notes
 
@@ -1245,13 +1200,13 @@ The return code of renaming a directory onto itself is unspecified.
 
 Renaming a file atop an existing file is specified as failing, raising an exception.
 
-* Local FileSystem : the rename succeeds; the destination file is replaced by the source file.
+- Local FileSystem : the rename succeeds; the destination file is replaced by the source file.
 
-* HDFS : The rename fails, no exception is raised. Instead the method call simply returns false.
+- HDFS : The rename fails, no exception is raised. Instead the method call simply returns false.
 
 **Missing source file**
 
-If the source file `src` does not exist,  `FileNotFoundException` should be raised.
+If the source file `src` does not exist, `FileNotFoundException` should be raised.
 
 HDFS fails without raising an exception; `rename()` merely returns false.
 
@@ -1261,7 +1216,6 @@ HDFS fails without raising an exception; `rename()` merely returns false.
 The behavior of HDFS here should not be considered a feature to replicate.
 `FileContext` explicitly changed the behavior to raise an exception, and the retrofitting of that action
 to the `DFSFileSystem` implementation is an ongoing matter for debate.
-
 
 ### `void concat(Path p, Path sources[])`
 
@@ -1293,21 +1247,17 @@ HDFS: All source files except the final one MUST be a complete block:
     for s in (sources[0:length(sources)-1] + [p]):
       (length(FS, s) mod getBlockSize(FS, p)) == 0
 
-
 #### Postconditions
-
 
     FS' where:
      (data(FS', T) = data(FS, T) + data(FS, sources[0]) + ... + data(FS, srcs[length(srcs)-1]))
      and for s in srcs: not exists(FS', S)
-
 
 HDFS's restrictions may be an implementation detail of how it implements
 `concat` by changing the inode references to join them together in
 a sequence. As no other filesystem in the Hadoop core codebase
 implements this method, there is no way to distinguish implementation detail
 from specification.
-
 
 ### `boolean truncate(Path p, long newLength)`
 
@@ -1343,8 +1293,6 @@ to complete before they can proceed with further file updates.
 If an input stream is open when truncate() occurs, the outcome of read
 operations related to the part of the file being truncated is undefined.
 
-
-
 ## <a name="RemoteIterator"></a> interface `RemoteIterator`
 
 The `RemoteIterator` interface is used as a remote-access equivalent
@@ -1355,7 +1303,7 @@ The core differences are
 
 1. `Iterator`'s optional `void remove()` method is not supported.
 2. For those methods which are supported, `IOException` exceptions
-may be raised.
+   may be raised.
 
 ```java
 public interface RemoteIterator<E> {
@@ -1385,7 +1333,7 @@ try {
 ```
 
 The `next()` operator MUST iterate through the list of available
-results, *even if no calls to `hasNext()` are made*.
+results, _even if no calls to `hasNext()` are made_.
 
 That is, it is possible to enumerate the results through a loop which
 only terminates when a `NoSuchElementException` exception is raised.
@@ -1455,7 +1403,6 @@ Return the next element in the iteration.
 Repeated calls to `next()` return
 subsequent elements in the sequence, until the entire sequence has been returned.
 
-
 ### <a name="RemoteIteratorConcurrency"></a>Concurrency and the Remote Iterator
 
 The primary use of `RemoteIterator` in the filesystem APIs is to list files
@@ -1474,7 +1421,6 @@ through a `hasNext()/next()` sequence with an outer `try/catch` clause to
 catch a `NoSuchElementException` alongside other exceptions which may be
 raised during a failure (for example, a `FileNotFoundException`)
 
-
 ```java
 try {
   while (iterator.hasNext()) {
@@ -1485,10 +1431,9 @@ try {
 }
 ```
 
-It is notable that this is *not* done in the Hadoop codebase. This does not imply
+It is notable that this is _not_ done in the Hadoop codebase. This does not imply
 that robust loops are not recommended —more that the concurrency
 problems were not considered during the implementation of these loops.
-
 
 ## <a name="StreamCapability"></a> interface `StreamCapabilities`
 
@@ -1510,11 +1455,10 @@ has the desired capability.
 The caller can query the capabilities of a stream using a string value.
 Here is a table of possible string values:
 
-String       | Constant   | Implements       | Description
--------------|------------|------------------|-------------------------------
-hflush       | HFLUSH     | Syncable         | Flush out the data in client's user buffer. After the return of this call, new readers will see the data.
-hsync        | HSYNC      | Syncable         | Flush out the data in client's user buffer all the way to the disk device (but the disk may have it in its cache). Similar to POSIX fsync.
-in:readahead | READAHEAD  | CanSetReadahead  | Set the readahead on the input stream.
-dropbehind   | DROPBEHIND | CanSetDropBehind | Drop the cache.
-in:unbuffer  | UNBUFFER   | CanUnbuffer      | Reduce the buffering on the input stream.
-
+| String       | Constant   | Implements       | Description                                                                                                                                |
+| ------------ | ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| hflush       | HFLUSH     | Syncable         | Flush out the data in client's user buffer. After the return of this call, new readers will see the data.                                  |
+| hsync        | HSYNC      | Syncable         | Flush out the data in client's user buffer all the way to the disk device (but the disk may have it in its cache). Similar to POSIX fsync. |
+| in:readahead | READAHEAD  | CanSetReadahead  | Set the readahead on the input stream.                                                                                                     |
+| dropbehind   | DROPBEHIND | CanSetDropBehind | Drop the cache.                                                                                                                            |
+| in:unbuffer  | UNBUFFER   | CanUnbuffer      | Reduce the buffering on the input stream.                                                                                                  |
